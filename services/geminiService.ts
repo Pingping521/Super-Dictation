@@ -1,11 +1,24 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { TranscriptSegment, VocabWord } from '../types';
 
-// Manual declaration to prevent 'process is not defined' build error
-declare const process: { env: { [key: string]: string | undefined } };
+// --- CRITICAL FIX: Safe API Key Access ---
+// We try to get the key safely without crashing the browser.
+let apiKey = '';
+try {
+  // 1. Try Vite standard way
+  // @ts-ignore
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_KEY) {
+    // @ts-ignore
+    apiKey = import.meta.env.VITE_API_KEY;
+  } 
+  // 2. Try process.env safely (for compatibility)
+  else if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+    apiKey = process.env.API_KEY;
+  }
+} catch (e) {
+  console.warn("API Key detection failed, app will load in limited mode.");
+}
 
-// Safe initialization to prevent crash if env is missing
-const apiKey = process.env.API_KEY || '';
 const ai = new GoogleGenAI({ apiKey: apiKey });
 
 const MODEL_FLASH = 'gemini-2.5-flash';
@@ -31,8 +44,7 @@ export const fileToGenerativePart = async (file: File): Promise<{ inlineData: { 
 
 // Helper to upload large files to Gemini API
 const uploadFileToGemini = async (file: File): Promise<string> => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) throw new Error("API Key is missing");
+  if (!apiKey) throw new Error("API Key is missing. Please check your settings.");
 
   const uploadBaseUrl = "https://generativelanguage.googleapis.com/upload/v1beta/files";
   
@@ -72,7 +84,7 @@ const uploadFileToGemini = async (file: File): Promise<string> => {
   let state = uploadResult.file.state;
   const fileName = uploadResult.file.name;
 
-  // 3. Poll for Active State (Required for videos)
+  // 3. Poll for Active State
   while (state === 'PROCESSING') {
     await new Promise(resolve => setTimeout(resolve, 2000));
     const pollResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/${fileName}?key=${apiKey}`);
@@ -87,9 +99,6 @@ const uploadFileToGemini = async (file: File): Promise<string> => {
 export const generateTranscript = async (file: File): Promise<TranscriptSegment[]> => {
   try {
     let contentPart;
-    
-    // Strategy: Use inline base64 for small files (< 20MB) for speed.
-    // Use File API for large files (> 20MB) to avoid browser memory issues and payload limits.
     const SIZE_LIMIT = 20 * 1024 * 1024; // 20MB
 
     if (file.size < SIZE_LIMIT) {
@@ -142,7 +151,6 @@ export const generateTranscript = async (file: File): Promise<TranscriptSegment[
     });
 
     const data = JSON.parse(response.text || "[]");
-    // Add IDs
     return data.map((item: any, index: number) => ({ ...item, id: index }));
 
   } catch (error) {

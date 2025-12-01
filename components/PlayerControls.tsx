@@ -49,12 +49,12 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
   };
 
   return (
-    <div className="bg-white border-t-2 border-black p-4 pb-8 shadow-[0_-4px_0_0_rgba(0,0,0,1)] z-50 relative">
-      <div className="max-w-2xl mx-auto">
+    <div className="bg-white border-t-2 border-black p-2 pb-6 shadow-[0_-4px_0_0_rgba(0,0,0,1)] z-50 relative w-full">
+      <div className="max-w-2xl mx-auto px-2">
         {/* Progress Bar */}
         <div 
           ref={progressBarRef}
-          className="relative h-6 w-full bg-gray-200 border-2 border-black rounded-full mb-4 cursor-pointer overflow-hidden touch-none"
+          className="relative h-5 w-full bg-gray-200 border-2 border-black rounded-full mb-3 cursor-pointer overflow-hidden touch-none"
           onClick={handleSeek}
           onTouchStart={handleSeek}
         >
@@ -64,20 +64,20 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           />
         </div>
 
-        {/* Controls Row */}
-        <div className="flex justify-between items-center px-4 relative">
+        {/* Controls Row - Optimized for Mobile */}
+        <div className="flex justify-between items-center w-full">
           
           {/* Left: Time */}
-          <div className="text-xs font-bold font-mono w-10">
+          <div className="text-xs font-bold font-mono w-10 flex-none">
               {formatTime(playerState.currentTime)}
           </div>
 
-          {/* Center: Prev | Play | Next */}
-          <div className="flex items-center gap-2">
+          {/* Center: Controls (Flexible width, centered) */}
+          <div className="flex items-center justify-center gap-1 flex-1 min-w-0 px-1">
               {/* Prev */}
               <Button 
                   variant="secondary" 
-                  className="px-3 h-10 rounded-xl text-xs sm:text-sm font-bold shadow-fun-sm whitespace-nowrap"
+                  className="px-2 h-9 rounded-lg text-xs font-bold shadow-fun-sm whitespace-nowrap scale-95"
                   onClick={onPrev}
               >
                   上一句
@@ -86,7 +86,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
               {/* Play */}
               <Button 
                   variant="primary" 
-                  className="w-16 h-16 rounded-full flex items-center justify-center text-2xl !p-0 shadow-fun mx-2"
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-xl !p-0 shadow-fun flex-none mx-1"
                   onClick={onTogglePlay}
               >
                   {playerState.isPlaying ? '⏸' : '▶'}
@@ -95,7 +95,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
               {/* Next */}
               <Button 
                   variant="secondary" 
-                  className="px-3 h-10 rounded-xl text-xs sm:text-sm font-bold shadow-fun-sm whitespace-nowrap"
+                  className="px-2 h-9 rounded-lg text-xs font-bold shadow-fun-sm whitespace-nowrap scale-95"
                   onClick={onNext}
               >
                   下一句
@@ -103,14 +103,14 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           </div>
           
           {/* Right: Speed */}
-          <div className="relative">
+          <div className="relative w-10 flex-none flex justify-end">
               {showSpeedMenu && (
-                  <div className="absolute bottom-full right-0 mb-2 bg-white border-2 border-black rounded-xl shadow-fun p-1 flex flex-col gap-1 w-16 z-50">
+                  <div className="absolute bottom-full right-0 mb-2 bg-white border-2 border-black rounded-xl shadow-fun p-1 flex flex-col gap-1 w-14 z-50">
                       {speeds.map(s => (
                           <button 
                               key={s}
                               onClick={() => handleSpeedChange(s)}
-                              className={`px-2 py-1 text-sm font-bold rounded hover:bg-gray-100 ${playerState.playbackRate === s ? 'bg-brand-yellow' : ''}`}
+                              className={`px-1 py-1 text-xs font-bold rounded hover:bg-gray-100 ${playerState.playbackRate === s ? 'bg-brand-yellow' : ''}`}
                           >
                               {s}x
                           </button>
@@ -119,7 +119,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
               )}
               <Button 
                   variant="secondary" 
-                  className="w-12 h-10 px-0 flex items-center justify-center text-sm" 
+                  className="w-10 h-8 px-0 flex items-center justify-center text-xs" 
                   onClick={() => setShowSpeedMenu(!showSpeedMenu)}
               >
                   {playerState.playbackRate}x

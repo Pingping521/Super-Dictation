@@ -1,6 +1,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { TranscriptSegment, VocabWord } from '../types';
 
+// Manual declaration to prevent 'process is not defined' build error
+declare const process: { env: { [key: string]: string | undefined } };
+
 // Safe initialization to prevent crash if env is missing
 const apiKey = process.env.API_KEY || '';
 const ai = new GoogleGenAI({ apiKey: apiKey });

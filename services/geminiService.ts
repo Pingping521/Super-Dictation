@@ -1,7 +1,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { TranscriptSegment, VocabWord } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Safe initialization to prevent crash if env is missing
+const apiKey = process.env.API_KEY || '';
+const ai = new GoogleGenAI({ apiKey: apiKey });
 
 const MODEL_FLASH = 'gemini-2.5-flash';
 
@@ -27,6 +29,8 @@ export const fileToGenerativePart = async (file: File): Promise<{ inlineData: { 
 // Helper to upload large files to Gemini API
 const uploadFileToGemini = async (file: File): Promise<string> => {
   const apiKey = process.env.API_KEY;
+  if (!apiKey) throw new Error("API Key is missing");
+
   const uploadBaseUrl = "https://generativelanguage.googleapis.com/upload/v1beta/files";
   
   // 1. Initiate Resumable Upload
